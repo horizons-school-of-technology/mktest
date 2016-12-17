@@ -11,6 +11,7 @@ it("fold.contains(['a', 'b', 'c'], 1) -> false, explanation", function() {
 });
 '''
 
+import argparse
 import sys
 import re
 
@@ -30,13 +31,31 @@ PAT = re.compile(r'''
   $
 ''', re.VERBOSE | re.MULTILINE)
 
-TEMPLATE = '''
+TEMPLATE_TO_BE = '''
 it("{test_case}", function() {{
   expect({funcall}).toBe({result});
 }});
 '''
 
-def main():
+TEMPLATE_TO_EQUAL = '''
+it("{test_case}", function() {{
+  expect({funcall}).toEqual({result});
+}});
+'''
+
+TEMPLATE_TO_THROW = '''
+it("{test_case}", function() {{
+  expect(function() {{ {funcall} }}).toThrow();
+}});
+'''
+
+def main(args):
+  TEMPLATE = TEMPLATE_TO_BE
+  if args.equals:
+    TEMPLATE = TEMPLATE_TO_EQUAL
+  elif args.throws:
+    TEMPLATE = TEMPLATE_TO_THROW
+
   for line in sys.stdin:
     line = line.strip()
     m = PAT.search(line)
@@ -44,4 +63,10 @@ def main():
       print TEMPLATE.format(**m.groupdict()).strip()
 
 if __name__ == '__main__':
-  main()
+  parser = argparse.ArgumentParser()
+  parser.add_argument("-t", "--throws", help="assert each case will throw an error",
+                              action="store_true")
+  parser.add_argument("-e", "--equals", help="use toEqual() to compare expected vs actual result",
+                              action="store_true")
+  args = parser.parse_args()
+  main(args)
