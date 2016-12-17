@@ -1,0 +1,47 @@
+#!/usr/bin/env python
+'''Convert example documentation into jasmine test specs.
+Reads from stdin, writes to stdout.
+
+Input:
+// ex. fold.contains(['a', 'b', 'c'], 1) -> false, explanation
+
+Output:
+it("fold.contains(['a', 'b', 'c'], 1) -> false, explanation", function() {
+  expect(fold.contains(['a', 'b', 'c'], 1)).toBe(false);
+});
+'''
+
+import sys
+import re
+
+# Matches something like "// ex. fold.contains(['a', 'b', 'c'], 1) -> false"
+PAT = re.compile(r'''
+  ^\s*
+  (
+    //\s* (?# double slash comment)
+    ex\.\s* (?# ex)
+  )?
+  (?P<test_case>
+    (?P<funcall> .* )
+    \s*->\s*
+    (?P<result> .*? ) (?# non greedy * to allow explanation)
+    (,[a-zA-Z0-9_ -]*)? (?# optional explanation, can only contain letters numbers, spaces, - or _)
+  )
+  $
+''', re.VERBOSE | re.MULTILINE)
+
+TEMPLATE = '''
+it("{test_case}", function() {{
+  expect({funcall}).toBe({result});
+}});
+'''
+
+def main():
+  for line in sys.stdin:
+    line = line.strip()
+    m = PAT.search(line)
+    if m:
+      print TEMPLATE.format(**m.groupdict()).strip()
+
+if __name__ == '__main__':
+  main()
