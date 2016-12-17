@@ -1,5 +1,7 @@
 usage: mktest [-h] [-t] [-e]
 
+Convert example documentation into jasmine test specs.
+
 optional arguments:
   -h, --help    show this help message and exit
   -t, --throws  assert each case will throw an error
