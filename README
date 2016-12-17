@@ -1,0 +1,6 @@
+usage: mktest [-h] [-t] [-e]
+
+optional arguments:
+  -h, --help    show this help message and exit
+  -t, --throws  assert each case will throw an error
+  -e, --equals  use toEqual() to compare expected vs actual result
